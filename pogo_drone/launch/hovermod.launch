@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="joy_dev" default="/dev/input/js0" />
+  <arg name="ip" default="vicon" />
+  <arg name="port" default="3883" />
+  <arg name="server" default="192.168.2.5"/>
+
+  <arg name="uri1" default="radio://0/80/2M/E7E7E7E7E7" />
+  
+  <arg name="frameName" default="PogoDrone" />
+
+  <arg name="x1" default="-0.8" />
+  <arg name="y1" default="1.5" />
+  <arg name="z1" default="1" />
+
+
+  <include file="$(find crazyflie_driver)/launch/crazyflie_server.launch">
+  </include>
+
+  <group ns="PogoDrone">
+    <node pkg="crazyflie_driver" type="crazyflie_add" name="crazyflie_add" output="screen">
+      <param name="uri" value="$(arg uri1)" />
+      <param name="tf_prefix" value="PogoDrone" />
+      <param name="enable_logging" value="False" />
+      <param name="enable_logging_imu" value="False" />
+      <param name="enable_logging_temperature" value="False" />
+      <param name="enable_logging_magnetic_field" value="False" />
+      <param name="enable_logging_pressure" value="False" />
+      <param name="enable_logging_battery" value="False" />
+      <param name="1ets" value="False" />
+      <rosparam>
+        <!-- genericLogTopics: ["motorPower", "eR", "er"]
+        genericLogTopicFrequencies: [100, 100, 100]
+        genericLogTopic_motorPower_Variables: ["motor.m1", "motor.m2", "motor.m3", "motor.m4"]
+        genericLogTopic_eR_Variables: ["ctrlMel.eRx", "ctrlMel.eRy", "ctrlMel.eRz"]
+        genericLogTopic_er_Variables: ["ctrlMel.ex", "ctrlMel.ey", "ctrlMel.ez"]
+        genericLogTopics: ["ie", "iem", "motorPower"]
+        genericLogTopicFrequencies: [100, 100, 100]
+        genericLogTopic_ie_Variables: ["ctrlMel.i_err_x", "ctrlMel.i_err_y", "ctrlMel.i_err_z"]
+        genericLogTopic_iem_Variables: ["ctrlMel.i_m_err_x", "ctrlMel.i_m_err_y", "ctrlMel.i_m_err_z"]
+        genericLogTopic_motorPower_Variables: ["motor.m1", "motor.m2", "motor.m3", "motor.m4"] -->
+        genericLogTopics: ["motorPower"]
+        genericLogTopicFrequencies: [100]
+        genericLogTopic_motorPower_Variables: ["motor.m1", "motor.m2", "motor.m3", "motor.m4"] 
+      </rosparam>
+    </node>
+
+    <node name="joy" pkg="joy" type="joy_node" output="screen">
+      <param name="dev" value="$(arg joy_dev)" />
+    </node>
+
+    <node name="joystick_controller" pkg="pogo_drone" type="controller.py" output="screen">
+      <param name="use_crazyflie_controller" value="True" />
+    </node>
+
+    <include file="$(find crazyflie_controller)/launch/crazyflie2.launch">
+      <arg name="frame" value="$(arg frameName)" />
+    </include>
+
+    <node name="currentpose" pkg="pogo_drone" type="publish_external_pose_vrpn.py" output="screen">
+      <param name="topic" value="/vrpn_client_node/PogoDrone/pose" />
+    </node>
+
+    <node name="pose" pkg="pogo_drone" type="publish_pose.py" output="screen">
+      <param name="name" value="goal" />
+      <param name="rate" value="30" />
+      <param name="x" value="$(arg x1)" />
+      <param name="y" value="$(arg y1)" />
+      <param name="z" value="$(arg z1)" />
+    </node>
+
+    <node pkg="tf" type="static_transform_publisher" name="baselink_broadcaster" args="0 0 0 0 0 0 1 $(arg frameName) /PogoDrone/base_link 100" />
+  </group>
+
+
+  <node pkg="vrpn_client_ros" type="vrpn_client_node" name="vrpn_client_node" output="screen">
+    <rosparam subst_value="true">
+      server: $(arg server)
+      port: $(arg port)
+
+      update_frequency: 100.0
+      frame1_id: world
+
+      # Use the VRPN server's time, or the client's ROS time.
+      use_server_time: false
+      broadcast_tf: true
+
+      # Must either specify refresh frequency > 0.0, or a list of trackers to create
+      refresh_tracker_frequency: 1.0
+      #trackers:
+      #- FirstTracker
+      #- SecondTracker
+    </rosparam>
+  </node>
+
+
+  <!-- run rviz -->
+  <param name="robot_description" command="$(find xacro)/xacro $(find crazyflie_description)/urdf/crazyflie.urdf.xacro" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find pogo_drone)/launch/crazyflie_pos.rviz" required="true" />
+ 
+</launch>
