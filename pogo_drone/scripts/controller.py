@@ -17,16 +17,35 @@ class Controller():
         rospy.set_param("stabilizer/estimator", 2)
         self._update_params(["stabilizer/estimator"])
 
-        rospy.set_param("ctrlMel/kp_z", 1.2)
-        self._update_params(["ctrlMel/kp_z"])
+        ###XY
+        #rospy.set_param("ctrlMel/kp_xy", .4) #default 0.4
+        #self._update_params(["ctrlMel/kp_xy"])
+        #rospy.set_param("ctrlMel/kd_xy", 0.2) #default 0.2
+        #self._update_params(["ctrlMel/kd_xy"])
+        #rospy.set_param("ctrlMel/ki_xy", 0.0) #default 0.05
+        #self._update_params(["ctrlMel/ki_xy"])
+        ### Z
+        #rospy.set_param("ctrlMel/kp_z", 1.25) #default 1.25
+        #self._update_params(["ctrlMel/kp_z"])
+        #rospy.set_param("ctrlMel/kd_z", 0.4) #default 0.4
+        #self._update_params(["ctrlMel/kd_z"])
+        #rospy.set_param("ctrlMel/ki_z", 0.0) #default 0.05
+        #self._update_params(["ctrlMel/ki_z"])
 
-        rospy.set_param("ctrlMel/kR_xy", 60000)
+        # Attitude
+        # 10 and 30 for P,D are good for shaking
+        rospy.set_param("ctrlMel/kR_xy", 30000) #Pdefault: 70000 30000
         self._update_params(["ctrlMel/kR_xy"])
-        rospy.set_param("ctrlMel/kw_xy", 30000)
+        rospy.set_param("ctrlMel/kw_xy", 40000) #Ddefualt: 20000 35000
         self._update_params(["ctrlMel/kw_xy"])
+        rospy.set_param("ctrlMel/ki_m_xy", 0.0) #Idefualt: 0
+        self._update_params(["ctrlMel/ki_m_xy"])
 
-        rospy.set_param("ctrlMel/mass", .041)
+        rospy.set_param("ctrlMel/mass", 0.04)
         self._update_params(["ctrlMel/mass"])
+
+        #rospy.set_param("ctrlMel/massThrust", 130000)
+        #self._update_params(["ctrlMel/massThrust"])
 
         rospy.loginfo("waiting for emergency service")
         rospy.wait_for_service('emergency')

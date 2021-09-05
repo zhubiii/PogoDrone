@@ -3,15 +3,15 @@
   <arg name="joy_dev" default="/dev/input/js0" />
   <arg name="ip" default="vicon" />
   <arg name="port" default="3883" />
-  <arg name="server" default="192.168.2.5"/>
+  <arg name="server" default="192.168.2.4"/>
 
-  <arg name="uri1" default="radio://0/80/2M/E7E7E7E7E7" />
+  <arg name="uri1" default="radio://0/90/2M/E7E7E7E7E7" />
   
   <arg name="frameName" default="PogoDrone" />
 
-  <arg name="x1" default="-0.8" />
-  <arg name="y1" default="1.5" />
-  <arg name="z1" default="1" />
+  <arg name="x1" default="-2.65" /> <!---.26 for big lab-->
+  <arg name="y1" default="1.49" /> <!--1.57 for big lab-->
+  <arg name="z1" default=".35" />
 
 
   <include file="$(find crazyflie_driver)/launch/crazyflie_server.launch">
@@ -61,7 +61,7 @@
       <param name="topic" value="/vrpn_client_node/PogoDrone/pose" />
     </node>
 
-    <node name="pose" pkg="pogo_drone" type="publish_pose.py" output="screen">
+    <node name="pose" pkg="pogo_drone" type="publish_pose_proximity.py" output="screen">
       <param name="name" value="goal" />
       <param name="rate" value="30" />
       <param name="x" value="$(arg x1)" />
